@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenericConnector sdkApiVersion="2.7.0">
+    <connectorClassName>com.sonos.boomi.connector.redis.RedisConnector</connectorClassName>
+</GenericConnector>

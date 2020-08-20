@@ -1,0 +1,46 @@
+<ObjectTypes operationMetadataResourceFormat="connector-metadata-{id}-{type}-{mode}.xsd">
+    <ObjectType>
+        <Id>String</Id>
+        <Label>String</Label>
+        <HelpText>Redis keys containing simple strings</HelpText>
+        <SupportedOperations>
+            <Operation>
+                <Type>GET</Type>
+                <HasInput>false</HasInput>
+                <HasOutput>true</HasOutput>
+            </Operation>
+            <Operation>
+                <Type>UPSERT</Type>
+                <HasInput>true</HasInput>
+                <HasOutput>true</HasOutput>
+            </Operation>
+            <Operation>
+                <Type>DELETE</Type>
+                <HasInput>false</HasInput>
+                <HasOutput>false</HasOutput>
+            </Operation>
+        </SupportedOperations>
+    </ObjectType>
+    <ObjectType>
+        <Id>HashSet</Id>
+        <Label>HashSet</Label>
+        <HelpText>Redis keys containing hashsets</HelpText>
+        <SupportedOperations>
+            <Operation>
+                <Type>GET</Type>
+                <HasInput>false</HasInput>
+                <HasOutput>true</HasOutput>
+            </Operation>
+            <Operation>
+                <Type>UPSERT</Type>
+                <HasInput>true</HasInput>
+                <HasOutput>false</HasOutput>
+            </Operation>
+            <Operation>
+                <Type>DELETE</Type>
+                <HasInput>false</HasInput>
+                <HasOutput>false</HasOutput>
+            </Operation>
+        </SupportedOperations>
+    </ObjectType>
+</ObjectTypes>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenericConnectorDescriptor disableDefaultObjectTypeFilter="true">
+    <description>Boomi Connector for Redis</description>
+    <field id="hosts" label="Redis Host(s)" type="string">
+        <helpText>Standalone Redis or clustered Redis hosts are supported and must be in Redis URI scheme format. Clustered host URIs must be semicolon delimited. Redis URI scheme details can be found at https://github.com/lettuce-io/lettuce-core/wiki/Redis-URI-and-connection-details.</helpText>
+    </field>
+    <testConnection method="CUSTOM" />
+    <operation types="GET">
+        <field id="keyPrefix" label="Key Prefix" type="string">
+            <helpText>All keys given to the connector will concatenate this prefix to the key value.</helpText>
+        </field>
+        <field id="throwOnNotFound" label="Throw On Not Found" type="boolean">
+            <helpText>By enabling this setting, all requests to get keys that do not yet exist will throw an error. This allows for a typical caching pattern whereby a cache hit is first attempted, then the data source is queried and the result is cached.</helpText>
+            <defaultValue>true</defaultValue>
+        </field>
+    </operation>
+    <operation types="UPSERT">
+        <field id="keyPrefix" label="Key Prefix" type="string">
+            <helpText>All keys given to the connector will concatenate this prefix to the key value.</helpText>
+        </field>
+    </operation>
+    <operation types="DELETE">
+        <field id="keyPrefix" label="Key Prefix" type="string">
+            <helpText>All keys given to the connector will concatenate this prefix to the key value.</helpText>
+        </field>
+    </operation>
+    <dynamicProperty id="key" label="Key" type="string" />
+    <dynamicProperty id="ttl" label="TTL" type="integer" />
+    <trackedProperty id="ttl" label="TTL" />
+</GenericConnectorDescriptor>
