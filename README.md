@@ -36,7 +36,7 @@ Add a custom connector group to your Boomi account by following the instructions
 ### Upload the connector
 Using the files that you extracted from the release download, upload the connector to the new connector group by following the instructions described in the Boomi documentation located here: https://help.boomi.com/bundle/connectors/page/t-atm-Adding_a_version_to_a_connector_group.html
 
-### Upgrading a connector version
+### Upgrading the connector version
 You can upgrade your Redis Connector version by clicking the "Add Version" button in your existing Redis Connector connector group.
 
 ## Using The Connector
