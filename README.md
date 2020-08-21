@@ -13,7 +13,7 @@ The connector can be used to store any data structure in a Redis database, and c
 |String|GET|Read||
 |String|UPSERT|Write||
 |String|DELETE|||
-|HashSet|GET|Read|GET operations will return the entire hashset. There is currently no way to query for items within a hashset using a connector operation.|
+|HashSet|GET|Read|GET operations will return the entire hashset by default. If the Redis Cache document property 'field' is provided, operation will return a single hash field value if it exists.|
 |HashSet|UPSERT|Write||
 |HashSet|DELETE||DELETE operations will delete the entire hashset. There is currently no way to delete specific items within a hashset using a connector operation.|
 
@@ -69,4 +69,5 @@ Find a description of the different document properties used by the connector be
 |-|-|-|-|-|-|
 |key|UPSERT|Input|true|Stores the cache key to use when upserting the document data into Redis.|
 |ttl|UPSERT|Input|false|Stores cache key time-to-live (ttl/expiration) to use in seconds.|Cache keys do not expire by default. Developers can optionally specify the cache key ttl using this property|
+|field|GET|Input|false|When specified, GET operations will return only the individual field within key|Only used on hashset operations|
 |ttl|GET|Output|false|Stores the current cache key time-to-live in seconds.|When getting a cache key, this output property will store the current ttl in seconds if the cache key is configured with an expiration.|
