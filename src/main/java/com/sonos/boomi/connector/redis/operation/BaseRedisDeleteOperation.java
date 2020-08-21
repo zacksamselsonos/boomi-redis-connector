@@ -22,8 +22,7 @@ import com.sonos.boomi.connector.redis.RedisConnection;
 import com.sonos.boomi.connector.redis.util.OperationUtil;
 import com.sonos.boomi.connector.redis.util.StringUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Responsible for all common logic used during DELETE operations
@@ -47,7 +46,7 @@ public abstract class BaseRedisDeleteOperation extends BaseDeleteOperation {
 
     /**
      * Closes the Redis connection
-     * @throws Throwable
+     * @throws Throwable Unhandled exceptions
      */
     protected void finalize() throws Throwable {
         super.finalize();
@@ -71,7 +70,8 @@ public abstract class BaseRedisDeleteOperation extends BaseDeleteOperation {
      */
     @Override
     protected void executeDelete(DeleteRequest deleteRequest, OperationResponse operationResponse) {
-        Map<String, ObjectIdData> idsForDeletion = new HashMap<>();
+        Set<String> idsForDeletion = new HashSet<>();
+        List<ObjectIdData> objectsForResult = new ArrayList<>();
         try {
             // Validate and store objectIds
             for (ObjectIdData deleteObject : deleteRequest) {
@@ -81,19 +81,18 @@ public abstract class BaseRedisDeleteOperation extends BaseDeleteOperation {
                     continue;
                 }
 
-                idsForDeletion.put(key, deleteObject);
+                idsForDeletion.add(key);
+                objectsForResult.add(deleteObject);
             }
 
             // Delete from cache
-            Long delResult = getRedisConnection().getConnection().sync().del(idsForDeletion.keySet().toArray(new String[]{}));
-            operationResponse.getLogger().fine(String.format("'DEL %s' command returned %s", com.boomi.util.StringUtil.join(", ", idsForDeletion.keySet()), delResult));
+            Long delResult = getRedisConnection().getConnection().sync().del(idsForDeletion.toArray(new String[]{}));
+            operationResponse.getLogger().fine(String.format("'DEL %s' command returned %s", com.boomi.util.StringUtil.join(", ", idsForDeletion), delResult));
 
             // Send final result
-            addResults(idsForDeletion, operationResponse, OperationStatus.SUCCESS, RESPONSE_SUCCESS, null, null);
-            return;
+            addResults(objectsForResult, operationResponse, OperationStatus.SUCCESS, RESPONSE_SUCCESS, null, null);
         } catch (Exception e) {
-            addResults(idsForDeletion, operationResponse, OperationStatus.FAILURE, RESPONSE_FAIL_ERR, e.getMessage(), e);
-            return;
+            addResults(objectsForResult, operationResponse, OperationStatus.FAILURE, RESPONSE_FAIL_ERR, e.getMessage(), e);
         } finally {
             getRedisConnection().closeConnection();
         }
@@ -109,19 +108,19 @@ public abstract class BaseRedisDeleteOperation extends BaseDeleteOperation {
     }
 
     /**
-     * @param objectKeyMap Map object containing object Ids and the related {@link com.boomi.connector.api.ObjectIdData} instances
+     * @param objectDataCollection Collection containing {@link com.boomi.connector.api.ObjectIdData} instances to report result on
      * @param operationResponse Response object used to report responses for all objects in objectKeyMap
      * @param status {@link com.boomi.connector.api.OperationStatus} enumeration used when reporting results
      * @param statusCode Status code used when reporting results
      * @param statusMessage Status message used when reporting results
      * @param throwable Exception used when reporting error results
      */
-    private void addResults(Map<String, ObjectIdData> objectKeyMap, OperationResponse operationResponse, OperationStatus status, String statusCode, String statusMessage, Throwable throwable) {
-        for (String key : objectKeyMap.keySet()) {
+    private void addResults(Collection<ObjectIdData> objectDataCollection, OperationResponse operationResponse, OperationStatus status, String statusCode, String statusMessage, Throwable throwable) {
+        for (ObjectIdData data : objectDataCollection) {
             if (status == OperationStatus.FAILURE) {
-                operationResponse.addErrorResult(objectKeyMap.get(key), status, statusCode, statusMessage, throwable);
+                operationResponse.addErrorResult(data, status, statusCode, statusMessage, throwable);
             } else {
-                operationResponse.addEmptyResult(objectKeyMap.get(key), status, statusCode, statusMessage);
+                operationResponse.addEmptyResult(data, status, statusCode, statusMessage);
             }
         }
     }

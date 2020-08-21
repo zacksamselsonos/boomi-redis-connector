@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -60,12 +61,25 @@ public class RedisGetHashSetOperation extends BaseRedisGetOperation {
                 return;
             }
 
+            // Get optional field value
+            String field = trackedData.getDynamicProperties().get("field");
+
             // Get from cache and validate result
-            Map<String, String> rtn = getRedisConnection().getConnection().sync().hgetall(objectId);
+            Map<String, String> rtn;
+            if (StringUtil.isNullOrEmpty(field)) {
+                rtn = getRedisConnection().getConnection().sync().hgetall(objectId);
+            } else {
+                String fieldRtn = getRedisConnection().getConnection().sync().hget(objectId, field);
+                rtn = new HashMap<>(1);
+                if (fieldRtn != null) {
+                    rtn.put(field, fieldRtn);
+                }
+            }
             if (rtn.size() == 0) {
                 boolean throwOnNotFound = getContext().getOperationProperties().getBooleanProperty("throwOnNotFound");
                 if (throwOnNotFound) {
-                    operationResponse.addResult(trackedData, OperationStatus.APPLICATION_ERROR, RESPONSE_FAIL_NOTFOUND, String.format("Key %s not found", objectId), null);
+                    String keyNotFoundFormat = "Key %s not found", keyFieldNotFound = "Key %s / field %s not found";
+                    operationResponse.addResult(trackedData, OperationStatus.APPLICATION_ERROR, RESPONSE_FAIL_NOTFOUND, String.format(StringUtil.isNullOrEmpty(field) ? keyNotFoundFormat : keyFieldNotFound, objectId, field), null);
                 } else {
                     /*
                     https://help.boomi.com/bundle/connectors/page/int-Implementing_custom_connector_operations.html
@@ -78,7 +92,7 @@ public class RedisGetHashSetOperation extends BaseRedisGetOperation {
             }
 
             // Get ttl
-            Integer ttl = Math.toIntExact(getRedisConnection().getConnection().sync().ttl(objectId));
+            int ttl = Math.toIntExact(getRedisConnection().getConnection().sync().ttl(objectId));
 
             // Construct metadata if there is a valid ttl
             PayloadMetadata metadata = null;
@@ -96,10 +110,8 @@ public class RedisGetHashSetOperation extends BaseRedisGetOperation {
                     operationResponse.addResult(trackedData, OperationStatus.SUCCESS, RESPONSE_SUCCESS, null, PayloadUtil.toPayload(payloadInputStream));
                 }
             }
-            return;
         } catch (Exception e) {
             operationResponse.addErrorResult(trackedData, OperationStatus.FAILURE, RESPONSE_FAIL_ERR, e.getMessage(), e);
-            return;
         } finally {
             getRedisConnection().closeConnection();
         }
@@ -109,7 +121,7 @@ public class RedisGetHashSetOperation extends BaseRedisGetOperation {
      * @param context Operation context used to create temporary output streams for memory management purposes
      * @param values Map of ID/Value pairs to write into an XML fragment
      * @return Returns an {@link java.io.OutputStream} containing the XML output of the GET operation
-     * @throws IOException
+     * @throws IOException Throws on IO exception
      */
     private OutputStream mapToGetResult(OperationContext context, Map<String, String> values) throws IOException {
         OutputStream getResult = context.createTempOutputStream();

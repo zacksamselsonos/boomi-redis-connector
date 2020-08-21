@@ -25,6 +25,7 @@
         </field>
     </operation>
     <dynamicProperty id="key" label="Key" type="string" />
+    <dynamicProperty id="field" label="Field" type="string" />
     <dynamicProperty id="ttl" label="TTL" type="integer" />
     <trackedProperty id="ttl" label="TTL" />
 </GenericConnectorDescriptor>
